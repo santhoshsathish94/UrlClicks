@@ -3,6 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
+using UrlClicks.Infrastructure.Interface;
+using UrlClicks.Persistence.Interface;
 
 namespace UrlClicks.WebAPI.Controllers
 {
@@ -14,7 +17,6 @@ namespace UrlClicks.WebAPI.Controllers
         [HttpGet]
         public ActionResult<IEnumerable<string>> Get()
         {
-            
             return new string[] { "value1", "value2" };
         }
 

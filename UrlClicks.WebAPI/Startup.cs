@@ -12,7 +12,8 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using UrlClicks.Infrastructure.Implemention;
 using UrlClicks.Infrastructure.Interface;
-using UrlClicks.Persistence;
+using UrlClicks.Persistence.Implemention;
+using UrlClicks.Persistence.Interface;
 
 namespace UrlClicks.WebAPI
 {
@@ -28,26 +29,39 @@ namespace UrlClicks.WebAPI
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
-            services.AddApplicationInsightsTelemetry();            
+            services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);            
+            services.AddApplicationInsightsTelemetry();
+            services.AddLogging(logging =>
+            {
+                logging.AddConfiguration(Configuration.GetSection("Logging"));
+                logging.AddConsole();
+                logging.AddDebug();
+                logging.AddApplicationInsights();
+            });
+
             var connectionString = Configuration.GetConnectionString("UrlClickDbConnection");
             services.AddPersistance(connectionString);
             services.AddHttpClient<IHttpRepository, HttpRepository>();
+
             var AppInsightsRestUrl = Configuration.GetValue<Uri>("AppInsightsRestUrl");
             services.AddHttpClient<IAppInsightsRepository, AppInsightsRepository>(
                 client => client.BaseAddress = AppInsightsRestUrl
-                );            
+                );
+
+            var AzureWebJobsStorage = Configuration.GetConnectionString("AzureWebJobsStorage");
+            services.AddTransient<IAzureStorageRepository, AzureStorageRepository>(c =>
+            {
+                return new AzureStorageRepository(AzureWebJobsStorage);
+            });
+            services.AddTransient<IUnitOfWork, UnitOfWork>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env,ILoggingBuilder builder)
+        public void Configure(IApplicationBuilder app, IHostingEnvironment env)
         {
-            builder.AddConfiguration(Configuration);
             if (env.IsDevelopment())
             {
-                app.UseDeveloperExceptionPage();        
-                builder.AddConsole();
-                builder.AddDebug();
+                app.UseDeveloperExceptionPage();
             }
             else
             {
