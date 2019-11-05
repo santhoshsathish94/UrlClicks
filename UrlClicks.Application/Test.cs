@@ -1,4 +1,5 @@
-﻿using Pathoschild.Http.Client;
+﻿using Microsoft.Extensions.Logging;
+using Pathoschild.Http.Client;
 using System;
 using UrlClicks.Infrastructure.Interface;
 using UrlClicks.Persistence.Interface;
@@ -10,11 +11,14 @@ namespace UrlClicks.Application
         private IHttpRepository _httpRepository;
         private IAppInsightsRepository _appInsightsRepository;
         private IUnitOfWork _uow;
-        public Test(IHttpRepository httpRepository,IAppInsightsRepository appInsightsRepository,IUnitOfWork uow)
+        private ILogger<Test> _logger { get; }
+        public Test(IHttpRepository httpRepository,IAppInsightsRepository appInsightsRepository,IUnitOfWork uow,ILogger<Test> logger)
         {            
             _httpRepository = httpRepository;
             _appInsightsRepository = appInsightsRepository;
-            _uow = uow;            
+            _uow = uow;
+            _logger = logger;
         }
+        
     }
 }
