@@ -8,6 +8,9 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UrlClicks.Application", "UrlClicks.Application\UrlClicks.Application.csproj", "{9F833336-E700-4577-BB1A-3FE71486FFE3}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Docs", "Docs", "{0A45FEA9-4A14-428E-B1A3-45643E1BC23F}"
+	ProjectSection(SolutionItems) = preProject
+		..\pfiles.rar = ..\pfiles.rar
+	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Source", "Source", "{5DEBC16E-F641-4A5E-A174-C2490F083D3B}"
 EndProject
@@ -29,7 +32,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UrlClicks.Infrastructure", 
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UrlClicks.WebAPI", "UrlClicks.WebAPI\UrlClicks.WebAPI.csproj", "{CB230335-C9E0-4DF7-B4DE-74ADEE6835DC}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UrlClicks.Funcapp", "UrlClicks.Funcapp\UrlClicks.Funcapp.csproj", "{8B6D2F64-2006-467F-BEC8-95D7CE576E38}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UrlClicks.Funcapp", "UrlClicks.Funcapp\UrlClicks.Funcapp.csproj", "{8B6D2F64-2006-467F-BEC8-95D7CE576E38}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
