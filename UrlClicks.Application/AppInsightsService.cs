@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
@@ -31,8 +32,6 @@ namespace UrlClicks.Application
             var urlclicks = await _appInsightsRepository.GetUrlClick(date,
                                                                "b762e2de-21d1-4176-a9a5-f0921247fd41",
                                                                "ovvv6cgzzzvzt87y480teiubixmk0r5bobibycy8");
-            _uow.UrlClickRepo.Merge(urlclicks);
-
             var moduleClicks = urlclicks.GroupBy(c => new { c.ModuleClickId, c.Date }).Select(c => new ModuleClick
             {
                 Id = c.Key.ModuleClickId,
@@ -40,10 +39,14 @@ namespace UrlClicks.Application
                 UniqueClicks = c.Count(),
                 TotalClicks = c.Sum(b => b.Count),
                 LastModifiedDate = c.Max(b => b.LastModifiedDate)
-            }).ToList();
+            }).ToList();            
 
-            var data = urlclicks.GroupBy(c=> c.ModuleClickId).Select(c=> )
-            await _azureStorageRepository.AddQueueAsync();
+            var data = urlclicks.GroupBy(c => c.ModuleClickId).Select(c => new { ModuleClickId = c.Key, UrlClickIds = c.Select(j=>j.Id)});
+            await _azureStorageRepository.AddQueueAsync(JsonConvert.SerializeObject(data),"1deletethisqueue");
+
+            _uow.UrlClickRepo.Merge(urlclicks);
+            _uow.ModuleClickRepo.Merge(moduleClicks);
+            _uow.Save();
         }
     }
 }
