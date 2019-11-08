@@ -8,9 +8,6 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UrlClicks.Application", "UrlClicks.Application\UrlClicks.Application.csproj", "{9F833336-E700-4577-BB1A-3FE71486FFE3}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Docs", "Docs", "{0A45FEA9-4A14-428E-B1A3-45643E1BC23F}"
-	ProjectSection(SolutionItems) = preProject
-		..\pfiles.rar = ..\pfiles.rar
-	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Source", "Source", "{5DEBC16E-F641-4A5E-A174-C2490F083D3B}"
 EndProject
