@@ -10,6 +10,8 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using UrlClicks.Application.Implemention;
+using UrlClicks.Application.Interface;
 using UrlClicks.Infrastructure.Implemention;
 using UrlClicks.Infrastructure.Interface;
 using UrlClicks.Persistence.Implemention;
@@ -54,6 +56,7 @@ namespace UrlClicks.WebAPI
                 return new AzureStorageRepository(AzureWebJobsStorage);
             });
             services.AddTransient<IUnitOfWork, UnitOfWork>();
+            services.AddTransient<IAppInsightsService, AppInsightsService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

@@ -1,4 +1,5 @@
-﻿using Pathoschild.Http.Client;
+﻿using Newtonsoft.Json;
+using Pathoschild.Http.Client;
 using Pathoschild.Http.Client.Extensibility;
 using Pathoschild.Http.Client.Retry;
 using System;
@@ -26,25 +27,36 @@ namespace UrlClicks.Infrastructure.Implemention
         {
             var urlTracks = new List<UrlClick>();
 
-            var dataList = await _httpClient
-                .Fluent()
-                .GetAsync($"{appId}/query")
-                .WithHeader("Content-Type", "application/json")
-                .WithHeader("x-api-key", apikey)
-                .WithArguments(new
-                {
-                    timespan = date.AddDays(-1).ToString("yyyy-MM-dd") + "%2F" + date.ToString("yyyy-MM-dd"),
-                    query = "urlclicks"
-                }).As<AppInsightResponse>();
+            var dataList = new AppInsightResponse();
+            //var dataList = await _httpClient
+            //    .Fluent()
+            //    .GetAsync($"{appId}/query")                
+            //    .WithHeader("x-api-key", apikey)
+            //    .WithArguments(new
+            //    {
+            //        timespan = date.ToString("yyyy-MM-dd") + "%2F" + date.AddDays(1).ToString("yyyy-MM-dd"),
+            //        query = "urlclicks"
+            //    }).As<AppInsightResponse>();
+
+            _httpClient.DefaultRequestHeaders.Add("x-api-key", apikey);
+            using (var response = await _httpClient.GetAsync("https://api.applicationinsights.io/v1/apps/b762e2de-21d1-4176-a9a5-f0921247fd41/query?timespan="+
+                date.ToString("yyyy-MM-dd") + "%2F" + date.AddDays(1).ToString("yyyy-MM-dd") + "&query=urlclicks"))
+            {
+                var result = await response.Content.ReadAsStringAsync();
+                dataList = JsonConvert.DeserializeObject<AppInsightResponse>(result);
+            }
 
             foreach (var item in dataList.tables.FirstOrDefault().rows)
             {
-                if (item[0] is Guid)
-                    urlTracks.Add(new UrlClick{
-                        Id = (Guid)item[0],
+                Guid trackId;
+                Guid moduleClickId;
+                if (Guid.TryParse((string)item[0], out trackId) && Guid.TryParse((string)item[3], out moduleClickId))
+                    urlTracks.Add(new UrlClick
+                    {
+                        Id = trackId,
                         Date = (DateTime)item[1],
-                        Type = (ModuleType)item[2],
-                        ModuleClickId = (Guid)item[3],
+                        Type = (ModuleType)Convert.ToInt32(item[2]),
+                        ModuleClickId = moduleClickId,
                         Url = (string)item[4],
                         Count = (int)(long)item[5],
                         LastModifiedDate = (DateTime)item[6],

@@ -15,10 +15,17 @@ namespace UrlClicks.Funcapp
         }
 
         [FunctionName("SyncUrlClicks")]
-        public void Run([TimerTrigger("0 * */1 * * *")]TimerInfo myTimer, ILogger log)
+        public void Run([TimerTrigger("0 0 */1 * * *", RunOnStartup = true)]TimerInfo myTimer, ILogger log)
         {
-            _appInsightsService.SyncUrlClicksAsync(DateTime.Now).GetAwaiter();
-            log.LogInformation($"C# Timer trigger function executed at: {DateTime.Now}");
+            try
+            {
+                _appInsightsService.SyncUrlClicksAsync(DateTime.Now).GetAwaiter();
+                log.LogInformation($"C# Timer trigger function executed at: {DateTime.Now}");
+            }
+            catch (Exception ex)
+            {
+                log.LogError(ex, $"C# Timer trigger function failed at: {DateTime.Now}");
+            }            
         }
     }
 }

@@ -7,6 +7,12 @@ using UrlClicks.Domain.Models;
 using UrlClicks.Infrastructure.Interface;
 using UrlClicks.Persistence.Interface;
 using UrlClicks.Application.Interface;
+using UrlClicks.Infrastructure.Models;
+using System.Net.Http;
+using System.Text;
+using System.Collections.Generic;
+using UrlClicks.Domain.Models.SMS;
+using UrlClicks.Application.Models;
 
 namespace UrlClicks.Application.Implemention
 {
@@ -43,11 +49,42 @@ namespace UrlClicks.Application.Implemention
             }).ToList();            
 
             var data = urlclicks.GroupBy(c => c.ModuleClickId).Select(c => new { ModuleClickId = c.Key, UrlClickIds = c.Select(j=>j.Id)});
-            await _azureStorageRepository.AddQueueAsync(JsonConvert.SerializeObject(data),"1deletethisqueue");
+            
+            foreach(var item in moduleClicks)
+            {
+                var activityModel = urlclicks.Where(c => c.ModuleClickId == item.Id).GroupBy(c => c.ModuleClickId).Select(c => new ActivityQueueModel { 
+                    ModuleClickId = c.Key,
+                    ClickIds = c.Select(s=>s.Id).ToList()
+                });
+                await _azureStorageRepository.AddQueueAsync(JsonConvert.SerializeObject(activityModel),"1deletethisqueue");
+            }
 
             _uow.UrlClickRepo.Merge(urlclicks);
             _uow.ModuleClickRepo.Merge(moduleClicks);
             _uow.Save();            
+        }
+
+        public async Task SyncActivityIds(ActivityQueueModel activityModel)
+        {
+            var activites = new List<ActivityResponseModel>();
+            using (var httpClient = new HttpClient())
+            {
+                var content = new StringContent(JsonConvert.SerializeObject(activityModel), Encoding.UTF8, "application/json");
+                using (var response = httpClient.PostAsync("https://messageservicestg.wechatify.com/api/SMS/GetActivityIds", content).Result)
+                {
+                    var result = await response.Content.ReadAsStringAsync();
+                    var res = JsonConvert.DeserializeObject<APIResponseModel>(result);
+                    activites = JsonConvert.DeserializeObject<List<ActivityResponseModel>>(res.Result.ToString());
+                }
+            }
+            var activityTracks = from a in activites
+                                select new LinkSmsActivity
+                                {
+                                    UrlClickId = a.ClickId,
+                                    SmsActivityClickId = a.ActivityId
+                                };
+            _uow.LinkSmsActivityRepo.Merge(activityTracks);
+            _uow.Save();
         }
     }
 }
