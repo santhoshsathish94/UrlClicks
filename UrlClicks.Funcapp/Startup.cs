@@ -3,10 +3,12 @@ using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
 using System.Text;
+using UrlClicks.Application.Implemention;
 using UrlClicks.Infrastructure.Implemention;
 using UrlClicks.Infrastructure.Interface;
 using UrlClicks.Persistence.Implemention;
 using UrlClicks.Persistence.Interface;
+using UrlClicks.Application.Interface;
 
 [assembly: FunctionsStartup(typeof(UrlClicks.Funcapp.Startup))]
 
@@ -31,6 +33,7 @@ namespace UrlClicks.Funcapp
                 return new AzureStorageRepository(AzureWebJobsStorage);
             });
             builder.Services.AddTransient<IUnitOfWork, UnitOfWork>();
+            builder.Services.AddTransient<IAppInsightsService, AppInsightsService>();
         }
     }
 }

@@ -6,14 +6,15 @@ using System.Threading.Tasks;
 using UrlClicks.Domain.Models;
 using UrlClicks.Infrastructure.Interface;
 using UrlClicks.Persistence.Interface;
+using UrlClicks.Application.Interface;
 
-namespace UrlClicks.Application
+namespace UrlClicks.Application.Implemention
 {
-    public class AppInsightsService
+    public class AppInsightsService : IAppInsightsService
     {                
         private IAppInsightsRepository _appInsightsRepository;
         private IUnitOfWork _uow;
-        private ILogger<AppInsightsService> _logger { get; }
+        private ILogger<AppInsightsService> _logger;
         private IAzureStorageRepository _azureStorageRepository;
 
         public AppInsightsService(IAppInsightsRepository appInsightsRepository,
@@ -27,7 +28,7 @@ namespace UrlClicks.Application
             _azureStorageRepository = azureStorageRepository;
         }
         
-        public async Task SyncUrlClicks(DateTime date)
+        public async Task SyncUrlClicksAsync(DateTime date)
         {
             var urlclicks = await _appInsightsRepository.GetUrlClick(date,
                                                                "b762e2de-21d1-4176-a9a5-f0921247fd41",
@@ -46,7 +47,7 @@ namespace UrlClicks.Application
 
             _uow.UrlClickRepo.Merge(urlclicks);
             _uow.ModuleClickRepo.Merge(moduleClicks);
-            _uow.Save();
+            _uow.Save();            
         }
     }
 }
