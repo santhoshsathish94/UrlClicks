@@ -43,7 +43,7 @@ namespace UrlClicks.WebAPI
 
             var connectionString = Configuration.GetConnectionString("UrlClickDbConnection");
             services.AddPersistance(connectionString);
-            services.AddHttpClient<IHttpRepository<object>, HttpRepository<object>>();
+            services.AddHttpClient<IHttpRepository, HttpRepository>();
 
             var AppInsightsRestUrl = Configuration.GetValue<Uri>("AppInsightsRestUrl");
             services.AddHttpClient<IAppInsightsRepository, AppInsightsRepository>(
