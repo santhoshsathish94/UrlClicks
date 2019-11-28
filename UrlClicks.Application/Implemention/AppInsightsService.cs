@@ -61,6 +61,7 @@ namespace UrlClicks.Application.Implemention
 
             _uow.UrlClickRepo.Merge(urlclicks);
             _uow.ModuleClickRepo.Merge(moduleClicks);
+            _uow.SmsActivityClickRepo.Execute(DateTime.Now);
             _uow.Save();            
         }
 
@@ -84,6 +85,7 @@ namespace UrlClicks.Application.Implemention
                                     SmsActivityClickId = a.ActivityId
                                 };
             _uow.LinkSmsActivityRepo.Merge(activityTracks);
+            _uow.SmsActivityClickRepo.Execute(DateTime.Now);
             _uow.Save();
         }
     }

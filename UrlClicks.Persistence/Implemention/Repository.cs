@@ -6,6 +6,7 @@ using System.Linq.Expressions;
 using System.Text;
 using UrlClicks.Persistence.Interface;
 using EFCore.BulkExtensions;
+using System.Data.SqlClient;
 
 namespace UrlClicks.Persistence.Implemention
 {
@@ -76,6 +77,12 @@ namespace UrlClicks.Persistence.Implemention
         public void Merge(IEnumerable<T> entities)
         {
             Context.BulkInsertOrUpdate(entities.ToList());
+        }
+
+        public void Execute(DateTime date)
+        {
+            var sqlparameter = new SqlParameter("@Date", date);
+            Context.Database.ExecuteSqlCommand("EXEC SyncActivity @Date", sqlparameter);
         }
     }
 }

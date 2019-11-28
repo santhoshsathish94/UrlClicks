@@ -25,5 +25,6 @@ namespace UrlClicks.Persistence.Interface
 
         void Remove(T entity);
         void RemoveRange(IEnumerable<T> entities);
+        void Execute(DateTime date);
     }
 }

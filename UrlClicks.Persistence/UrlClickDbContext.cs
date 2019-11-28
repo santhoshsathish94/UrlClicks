@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using System;
+using System.Collections.Generic;
 using UrlClicks.Domain.Models;
 using UrlClicks.Domain.Models.SMS;
 using UrlClicks.Persistence.Configs;
@@ -24,6 +25,6 @@ namespace UrlClicks.Persistence
             builder.ApplyConfiguration(new ModuleClicksConfig());
             builder.ApplyConfiguration(new LinkSmsActivitiesConfig());
             builder.ApplyConfiguration(new SmsActivityClicksConfig());
-        }
+        }        
     }    
 }
