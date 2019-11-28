@@ -13,6 +13,7 @@ using System.Text;
 using System.Collections.Generic;
 using UrlClicks.Domain.Models.SMS;
 using UrlClicks.Application.Models;
+using UrlClicks.Infrastructure.Common;
 
 namespace UrlClicks.Application.Implemention
 {
@@ -22,6 +23,11 @@ namespace UrlClicks.Application.Implemention
         private IUnitOfWork _uow;
         private ILogger<AppInsightsService> _logger;
         private IAzureStorageRepository _azureStorageRepository;
+        private readonly string SyncSMSActivityQueue = AppSettings.GetValue("syncsmssctivityqueue");
+        private readonly string AIAPIkey = AppSettings.GetValue("AIAPIKey");
+        private readonly string AIAppId = AppSettings.GetValue("AIAppId");
+        private readonly string MSGetActivityAPI = AppSettings.GetValue("MSGetActivityAPI");
+        
 
         public AppInsightsService(IAppInsightsRepository appInsightsRepository,
                                   IUnitOfWork uow,
@@ -36,9 +42,8 @@ namespace UrlClicks.Application.Implemention
         
         public async Task SyncUrlClicksAsync(DateTime date)
         {
-            var urlclicks = await _appInsightsRepository.GetUrlClick(date,
-                                                               "b762e2de-21d1-4176-a9a5-f0921247fd41",
-                                                               "ovvv6cgzzzvzt87y480teiubixmk0r5bobibycy8");
+            var urlclicks = await _appInsightsRepository.GetUrlClick(date, AIAppId, AIAPIkey);
+
             var moduleClicks = urlclicks.GroupBy(c => new { c.ModuleClickId, c.Date }).Select(c => new ModuleClick
             {
                 Id = c.Key.ModuleClickId,
@@ -56,7 +61,7 @@ namespace UrlClicks.Application.Implemention
                     ModuleClickId = c.Key,
                     ClickIds = c.Select(s=>s.Id).ToList()
                 });
-                await _azureStorageRepository.AddQueueAsync(JsonConvert.SerializeObject(activityModel),"1deletethisqueue");
+                await _azureStorageRepository.AddQueueAsync(JsonConvert.SerializeObject(activityModel), SyncSMSActivityQueue);
             }
 
             _uow.UrlClickRepo.Merge(urlclicks);
@@ -68,16 +73,18 @@ namespace UrlClicks.Application.Implemention
         public async Task SyncActivityIds(ActivityQueueModel activityModel)
         {
             var activites = new List<ActivityResponseModel>();
+            
             using (var httpClient = new HttpClient())
             {
                 var content = new StringContent(JsonConvert.SerializeObject(activityModel), Encoding.UTF8, "application/json");
-                using (var response = httpClient.PostAsync("https://messageservicestg.wechatify.com/api/SMS/GetActivityIds", content).Result)
+                using (var response = httpClient.PostAsync(MSGetActivityAPI, content).Result)
                 {
                     var result = await response.Content.ReadAsStringAsync();
                     var res = JsonConvert.DeserializeObject<APIResponseModel>(result);
                     activites = JsonConvert.DeserializeObject<List<ActivityResponseModel>>(res.Result.ToString());
                 }
             }
+
             var activityTracks = from a in activites
                                 select new LinkSmsActivity
                                 {

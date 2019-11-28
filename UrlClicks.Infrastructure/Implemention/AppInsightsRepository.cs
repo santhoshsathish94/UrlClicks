@@ -11,13 +11,15 @@ using System.Text;
 using System.Threading.Tasks;
 using UrlClicks.Domain.Enums;
 using UrlClicks.Domain.Models;
+using UrlClicks.Infrastructure.Common;
 using UrlClicks.Infrastructure.Interface;
 using UrlClicks.Infrastructure.Models.AppInsights;
 
 namespace UrlClicks.Infrastructure.Implemention
 {
     public class AppInsightsRepository : ApiRepository, IAppInsightsRepository
-    {        
+    {
+        private readonly string AppInsightsRestUrl = AppSettings.GetValue("AppInsightsRestUrl");
         public AppInsightsRepository(HttpClient httpClient) : base(httpClient)
         {
             
@@ -39,7 +41,7 @@ namespace UrlClicks.Infrastructure.Implemention
             //    }).As<AppInsightResponse>();
 
             _httpClient.DefaultRequestHeaders.Add("x-api-key", apikey);
-            using (var response = await _httpClient.GetAsync("https://api.applicationinsights.io/v1/apps/b762e2de-21d1-4176-a9a5-f0921247fd41/query?timespan="+
+            using (var response = await _httpClient.GetAsync($"{AppInsightsRestUrl}{appId}/query?timespan="+
                 date.ToString("yyyy-MM-dd") + "%2F" + date.AddDays(1).ToString("yyyy-MM-dd") + "&query=urlclicks"))
             {
                 var result = await response.Content.ReadAsStringAsync();

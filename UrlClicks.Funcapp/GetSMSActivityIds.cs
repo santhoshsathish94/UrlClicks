@@ -19,7 +19,7 @@ namespace UrlClicks.Funcapp
         }
 
         [FunctionName("GetSMSActivityIds")]
-        public void Run([QueueTrigger("1deletethisqueue", Connection = "AzureWebJobsStorage")]string myQueueItem, ILogger log)
+        public void Run([QueueTrigger("%syncsmssctivityqueue%", Connection = "AzureWebJobsStorage")]string myQueueItem, ILogger log)
         {
             var activityModel = JsonConvert.DeserializeObject<List<ActivityQueueModel>>(myQueueItem);
             _appInsightsService.SyncActivityIds(activityModel.FirstOrDefault()).GetAwaiter();
